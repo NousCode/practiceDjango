@@ -1,35 +1,57 @@
-"""Django models utilities."""
+"""User model."""
 
 # Django
 from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.core.validators import RegexValidator
+
+# Utilities
+from cride.utils.models import CRideModel
 
 
-class CRideModel(models.Model):
-    """Comparte Ride base model.
+class User(CRideModel, AbstractUser):
+    """User model.
 
-    CRideModel acts as an abstract base class from which every
-    other model in the project will inherit. This class provides
-    every table with the following attributes:
-        + created (DateTime): Store the datetime the object was created.
-        + modified (DateTime): Store the last datetime the object was modified.
+    Extend from Django's Abstract user, change the username field
+    to email and add some extra fields.
     """
 
-    created = models.DateTimeField(
-        'created at',
-        auto_now_add = True,
-        help_text = 'Date time on which the object was created.'
+    email = models.EmailField(
+        'email',
+        unique=True,
+        error_messages={
+            'unique': 'A user with that already exists.'
+        }
     )
 
-    modified = models.DateTimeField(
-        'modified at',
-        auto_now = True,
-        help_text = 'Date time on which the object was last modified.'
+    phone_regex = RegexValidator(
+        regex=r'\+?1?\d{9,15}',
+        message='Phone number must be entered in the format: +999999999. Up to 15 digits allowed.'
+    )
+    phone_number = models.CharField(validators=[phone_regex], max_length=17, blank=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+
+    is_client = models.BooleanField(
+        'client status',
+        default=True,
+        help_text=(
+            'Help esily distinguish users and perform queries.'
+            'Clients are the main type of user.'
+        )
     )
 
-    class Meta:
-        """Meta option."""
+    is_verified = models.BooleanField(
+        'verified',
+        default=True,
+        help_text='Set to true when the user have verified its email address.'
+    )
 
-        abstract = True
+    def __str__(self):
+        """Return username."""
+        return self.username
 
-        get_latest_by = 'created'
-        ordering = ['-created', '-modified']
+    def get_short_name(self):
+        """Return username."""
+        return self.username
