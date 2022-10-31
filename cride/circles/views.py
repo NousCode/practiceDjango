@@ -11,18 +11,16 @@ from cride.circles.models import Circle
 from cride.circles.serializers import CircleSerializer, CreateCircleSerializer
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def list_circles(request):
-    """List circles."""
-    circles = Circle.objects.filter(is_public=True)
-    serializer = CircleSerializer(circles, many=True)
-    return Response(serializer.data)
+    """List circles or create a circle."""
+    if request.method == 'GET':
+        circles = Circle.objects.filter(is_public=True)
+        serializer = CircleSerializer(circles, many=True)
+        return Response(serializer.data)
 
-
-@api_view(['POST'])
-def create_circle(request):
-    """Create a circle."""
-    serializer = CreateCircleSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    circle = serializer.save()
-    return Response(CircleSerializer(circle).data)
+    elif request.method == 'POST':
+        serializer = CreateCircleSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        circle = serializer.save()
+        return Response(CircleSerializer(circle).data)
