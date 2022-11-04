@@ -23,6 +23,7 @@ class CircleViewSet(
     viewsets.GenericViewSet):
     """Circle view set."""
 
+    lookup_field = 'slug_name'
     queryset = Circle.objects.all()
     serializer_class = CircleModelSerializer
     permission_classes = (IsAuthenticated,)
